@@ -1,0 +1,21 @@
+{
+  "name": "hjson2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "module": "index.es.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "hjson",
+    "json"
+  ],
+  "author": "daycool",
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "hjson": "^3.1.1",
+    "generate-schema": "^2.6.0"
+  },
+  "license": "ISC"
+}
