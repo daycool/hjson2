@@ -9,39 +9,39 @@ var lodash = require('lodash');
 var GenerateSchema = _interopDefault(require('generate-schema/src/schemas/json'));
 
 class HjsonData {
-  constructor () {
+  constructor() {
     this.obj = null;
     // this.comments = null
     this.startCommentSymbol = '/*';
     this.endCommentSymbol = '*/';
   }
-  parse (hjsonText, opts) {
+  parse(hjsonText, opts) {
     opts = opts || { keepWsc: true };
 
     this.obj = Hjson.parse(hjsonText, opts);
 
-    return this
+    return this;
   }
-  stringify (opts) {
+  stringify(opts) {
     opts = opts || {};
-    return Hjson.rt.stringify(this.obj, opts)
+    return Hjson.rt.stringify(this.obj, opts);
   }
   // stringifyComments () {
   //   return Hjson.stringify(this.comments)
   // }
-  getCommentJson (varName, pos) {
+  getCommentJson(varName, pos) {
     let hjson = this.getCommentHjson(varName, pos);
-    return hjson.obj
+    return hjson.obj;
   }
-  getCommentHjson (varName, pos) {
+  getCommentHjson(varName, pos) {
     let comment = this.getComment(varName, pos);
     let commentHjson = new HjsonData().parse(comment);
     this.parseKey(commentHjson.obj, []);
 
-    return commentHjson
+    return commentHjson;
   }
 
-  parseKey (obj) {
+  parseKey(obj) {
     if (Array.isArray(obj)) {
       obj.forEach((item, index) => {
         if (lodash.isPlainObject(item)) {
@@ -64,7 +64,7 @@ class HjsonData {
           const component = {
             __componentName: componentName,
             __componentParams: params,
-            ...value
+            ...value,
           };
 
           params.forEach((param, index) => {
@@ -77,9 +77,9 @@ class HjsonData {
         }
       });
     }
-    return obj
+    return obj;
   }
-  restoreKey (data, parentKey, parentNode) {
+  restoreKey(data, parentKey, parentNode) {
     if (lodash.isPlainObject(data)) {
       if ('__componentName' in data) {
         let newKey = [parentKey, data.__componentName]
@@ -103,63 +103,63 @@ class HjsonData {
       });
     }
   }
-  setCommentJson (varName, json, pos) {
+  setCommentJson(varName, json, pos) {
     let cloneJson = clone(json);
     this.restoreKey(cloneJson);
     let comment = Hjson.stringify(cloneJson, {
       // bracesSameLine: true,
       emitRootBraces: false,
-      separator: true
+      separator: true,
     });
     comment = this.unwrapBrace(comment);
     this.setComment(varName, comment, pos);
-    return this
+    return this;
   }
-  getRootCommentJson (pos) {
+  getRootCommentJson(pos) {
     let hjson = this.getRootCommentHjson(pos);
-    return hjson.obj
+    return hjson.obj;
   }
-  getRootCommentHjson (pos) {
+  getRootCommentHjson(pos) {
     let comment = this.getRootComment(pos);
     let commentHjson = new HjsonData().parse(comment);
     this.parseKey(commentHjson.obj, []);
-    return commentHjson
+    return commentHjson;
   }
-  setRootCommentJson (json, pos) {
+  setRootCommentJson(json, pos) {
     let cloneJson = clone(json);
     this.restoreKey(cloneJson);
     let comment = Hjson.stringify(cloneJson, {
       // bracesSameLine: true,
       emitRootBraces: false,
-      separator: true
+      separator: true,
     });
     comment = this.unwrapBrace(comment);
     this.setRootComment(comment, pos);
-    return this
+    return this;
   }
-  getRootComment (pos = 0) {
+  getRootComment(pos = 0) {
     const originComments = this.getRootOriginComments(this.obj);
     const rootComment = originComments.r[pos];
 
-    return this.unwrapCommentSymbol(rootComment)
+    return this.unwrapCommentSymbol(rootComment);
   }
-  setRootComment (value, pos = 0) {
+  setRootComment(value, pos = 0) {
     let rootComment = this.wrapCommentSymbol(value);
     const originComments = this.getRootOriginComments(this.obj);
     originComments.r[pos] = originComments.r[pos] || ['', ''];
     originComments.r[pos] = rootComment;
   }
 
-  getComment (varName, pos = 0) {
+  getComment(varName, pos = 0) {
     let { lastObj, lastKey } = this.getLastVarInfo(varName);
 
     const originComments = this.getOriginComments(lastObj);
     const comment = (originComments.c || originComments.a)[lastKey][pos];
 
-    return this.unwrapCommentSymbol(comment)
+    return this.unwrapCommentSymbol(comment);
   }
 
-  setComment (varName, value, pos = 0) {
+  setComment(varName, value, pos = 0) {
     let { lastObj, lastKey } = this.getLastVarInfo(varName);
 
     const originComments = this.getOriginComments(lastObj);
@@ -172,7 +172,7 @@ class HjsonData {
     }
   }
 
-  getLastVarInfo (varName) {
+  getLastVarInfo(varName) {
     let lastObj = this.obj;
     let lastKey = varName;
     if (Array.isArray(varName)) {
@@ -188,25 +188,25 @@ class HjsonData {
 
     return {
       lastObj,
-      lastKey
-    }
+      lastKey,
+    };
   }
 
-  getVar (varName) {
+  getVar(varName) {
     if (Array.isArray(varName)) {
       let value = this.obj;
       varName.forEach(key => {
         value = value[key];
       });
-      return value
+      return value;
     } else if (varName) {
-      return this.obj[varName]
+      return this.obj[varName];
     } else {
-      return this.obj
+      return this.obj;
     }
   }
 
-  setVar (varName, value, comment) {
+  setVar(varName, value, comment) {
     let lastObj = this.obj;
     let lastKey = varName;
     if (Array.isArray(varName)) {
@@ -228,39 +228,39 @@ class HjsonData {
     if (comment) {
       this.setComment(varName, comment);
     }
-    return this
+    return this;
   }
-  ensureKeyExist (obj, key) {
+  ensureKeyExist(obj, key) {
     const originComments = this.getOriginComments(obj);
     if (originComments.o.indexOf(key) === -1) {
       originComments.o.push(key);
     }
   }
 
-  getRootOriginComments (obj) {
+  getRootOriginComments(obj) {
     obj.__COMMENTS__ = obj.__COMMENTS__ || { c: {}, o: [], r: ['', ''] };
     obj.__COMMENTS__.r = obj.__COMMENTS__.r || ['', ''];
-    return obj.__COMMENTS__
+    return obj.__COMMENTS__;
   }
-  getOriginComments (obj) {
+  getOriginComments(obj) {
     obj.__COMMENTS__ = obj.__COMMENTS__ || { c: {}, o: [], r: ['', ''] };
-    return obj.__COMMENTS__
+    return obj.__COMMENTS__;
   }
-  setOriginComments (obj, originComments) {
+  setOriginComments(obj, originComments) {
     obj.__COMMENTS__ = originComments;
   }
 
-  updateVar (varName, newVarName) {
+  updateVar(varName, newVarName) {
     let { lastObj, lastKey } = this.getLastVarInfo(varName);
     let lastValue = lastObj[lastKey];
     delete lastObj[lastKey];
     lastObj[newVarName] = lastValue;
   }
 
-  wrapCommentSymbol (value) {
-    return `${this.startCommentSymbol}${value}${this.endCommentSymbol}`
+  wrapCommentSymbol(value) {
+    return `${this.startCommentSymbol}${value}${this.endCommentSymbol}`;
   }
-  unwrapCommentSymbol (value) {
+  unwrapCommentSymbol(value) {
     let startCommentSymbol = this.startCommentSymbol.replace(
       /([\*\/\\])/g,
       '\\$1'
@@ -271,61 +271,59 @@ class HjsonData {
       .replace(new RegExp(`^\\s*${startCommentSymbol}`), '')
       .replace(new RegExp(`${endCommentSymbol}\\s*$`), '');
 
-    return newValue
+    return newValue;
   }
-  unwrapBrace (value) {
+  unwrapBrace(value) {
     let newValue = value
       .replace(new RegExp(`^\\s*\\{`), '')
       .replace(new RegExp(`\\}\\s*$`), '');
 
-    return `
-      ${newValue}
-    `
+    return `${newValue}`;
   }
 }
 
-function clone (obj) {
-  return JSON.parse(JSON.stringify(obj))
+function clone(obj) {
+  return JSON.parse(JSON.stringify(obj));
 }
 
-function objToHjsonStr (obj) {
-  return jsonToHjsonStr(JSON.stringify(obj))
+function objToHjsonStr(obj) {
+  return jsonToHjsonStr(JSON.stringify(obj));
 }
-function objToHjson (obj) {
+function objToHjson(obj) {
   const hj = new HjsonData().parse(JSON.stringify(obj));
-  return hj
+  return hj;
 }
-function jsonToHjsonStr (json) {
+function jsonToHjsonStr(json) {
   const hj = new HjsonData().parse(json);
-  return hj.stringify()
+  return hj.stringify();
 }
 
-function hjsonStrToObj (hjson) {
+function hjsonStrToObj(hjson) {
   const hj = new HjsonData().parse(hjson);
-  return hj.obj
+  return hj.obj;
 }
-function hjsonToObj (hjson) {
-  return JSON.parse(JSON.stringify(hjson.obj))
+function hjsonToObj(hjson) {
+  return JSON.parse(JSON.stringify(hjson.obj));
 }
-function hjsonToHjsonStr (hjson) {
-  return hjson.stringify()
+function hjsonToHjsonStr(hjson) {
+  return hjson.stringify();
 }
-function hjsonToJsonSchema (text) {
+function hjsonToJsonSchema(text) {
   const hjson = new HjsonData().parse(text);
 
-  const jsonSchema = GenerateSchema('root', hjson.obj);
+  const jsonSchema = GenerateSchema('', hjson.obj);
   addComments(jsonSchema, hjson, []);
-  return jsonSchema
+  return jsonSchema;
 }
 
-function jsonSchemaToHjson (jsonSchema) {
+function jsonSchemaToHjson(jsonSchema) {
   const obj = jsonSchemaToJson(jsonSchema);
   const hjson = objToHjson(obj);
   jsonSchemaMergeHjson(jsonSchema, hjson);
-  return hjson.stringify()
+  return hjson.stringify();
 }
 
-function addComments (jsonSchema, hjson, paths) {
+function addComments(jsonSchema, hjson, paths) {
   const type = jsonSchema.type;
   const key = paths[paths.length - 1];
   let comments = null;
@@ -347,10 +345,10 @@ function addComments (jsonSchema, hjson, paths) {
   } else if (type === 'array' && Object.keys(jsonSchema.items).length) {
     addComments(jsonSchema.items, hjson, paths.concat(0));
   }
-  return jsonSchema
+  return jsonSchema;
 }
 
-function jsonSchemaToJson (jsonSchema) {
+function jsonSchemaToJson(jsonSchema) {
   let res = null;
   if (jsonSchema.type === 'object') {
     res = {};
@@ -364,17 +362,23 @@ function jsonSchemaToJson (jsonSchema) {
   } else {
     res = jsonSchema.default;
   }
-  return res
+  return res;
 }
 
-function jsonSchemaMergeHjson (jsonSchema, hjson, paths = []) {
+function jsonSchemaMergeHjson(jsonSchema, hjson, paths = []) {
   if (!paths.length) {
     hjson.setRootCommentJson({
-      ...lodash.omit(jsonSchema, ['properties', 'items'])
+      ...lodash.omit(jsonSchema, [
+        'properties',
+        'items',
+        '$schema',
+        'required',
+        'title',
+      ]),
     });
   } else {
     hjson.setCommentJson(paths, {
-      ...lodash.omit(jsonSchema, ['properties', 'items'])
+      ...lodash.omit(jsonSchema, ['properties', 'items', '$schema', 'required']),
     });
   }
 
